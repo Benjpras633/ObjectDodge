@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Media;
 
 namespace GameTemplate
 {
@@ -19,14 +20,18 @@ namespace GameTemplate
         Object player;
         int playerSize = 20; // size of player
         int playerSpeed = 10; // speed of player
+        int playerScore = 0; // player score
         SolidBrush playerBrush = new SolidBrush(Color.White); // brush to draw player
 
         // object variables
-        SolidBrush objectBrush = new SolidBrush(Color.White);
-        Random randGen = new Random(); //generates x values and colour of objects 
+        SolidBrush objectBrush = new SolidBrush(Color.White); // brush to draw objects
+        Random randGen = new Random(); // generates x values and colour of objects 
 
         // list of all objects
         List<Object> objects = new List<Object>();
+
+        // sounds
+        SoundPlayer explosion = new SoundPlayer(Properties.Resources.explosion);
 
         public GameScreen()
         {
@@ -38,16 +43,22 @@ namespace GameTemplate
         {
             MakeObjects(); // call MakeObjects method
 
+            Cursor.Hide(); // hide cursor
+
+            scoreLabel.Text = "Score: " + playerScore; // display on score label
+
+            // draw player in starting position
             player = new Object(this.Width / 2 - playerSize / 2, this.Height - 100, playerSize);
         }
 
         public void MakeObjects()
         {
-            int color = randGen.Next(1, 6);
-            int objectX = randGen.Next(1, 781);
+            int color = randGen.Next(1, 6); // gives object its colour
+            int objectX = randGen.Next(1, 781); // gives x value for each object
 
             Color c = Color.White;
 
+            // checks which colour the object will be
             if (color == 1)
             {
                 c = Color.Green;
@@ -68,7 +79,6 @@ namespace GameTemplate
             {
                 c = Color.Orange;
             }
-
 
             // set object start values
             Object newObject = new Object(objectX, 0, 20, c);
@@ -105,25 +115,29 @@ namespace GameTemplate
 
         private void gameTimer_Tick(object sender, EventArgs e)
         {
-            // update location of all boxes (drop down screen)
+            // update location of all objects (drop down screen)
             foreach (Object b in objects)
             {
-                b.Fall(5);
+                b.Fall(7);
             }
 
-            // remove box if it has gone of screen
-            if (objects[0].y > this.Height - 100)
+            // remove object if it has gone off the screen
+            if (objects[0].y > this.Height - 50)
             {
                 objects.RemoveAt(0);
+
+                // adjust player score and display new player score
+                playerScore++;
+                scoreLabel.Text = "Score: " + playerScore;
             }
 
-            // add new box if it is time
+            // add new object if it is time
             if (objects[objects.Count - 1].y > 21)
             {
                 MakeObjects();
             }
 
-            // controlling hero
+            // player controls
             if (leftArrowDown == true && player.x > 0)
             {
                 player.Move(playerSpeed, false);
@@ -141,16 +155,16 @@ namespace GameTemplate
                 // check objects 0-3 in lists
                 for (int i = 0; i < 4; i++)
                 {
-                    Rectangle leftBoxRec = new Rectangle(objects[i].x, objects[i].y, objects[i].size, objects[i].size);
+                    Rectangle objectRec = new Rectangle(objects[i].x, objects[i].y, objects[i].size, objects[i].size);
 
                     // stop game timer 
-                    if (leftBoxRec.IntersectsWith(playerRec))
+                    if (objectRec.IntersectsWith(playerRec))
                     {
-                        gameTimer.Enabled = false;
+                        Hit(); // call hit method
                     }
                 }
             }
-            Refresh();
+            Refresh(); // update game timer
         }
 
         private void GameScreen_Paint(object sender, PaintEventArgs e)
@@ -162,8 +176,59 @@ namespace GameTemplate
                 e.Graphics.FillRectangle(objectBrush, o.x, o.y, o.size, o.size);
             }
 
-            // draw player
+            // draw player to screen
             e.Graphics.FillRectangle(playerBrush, player.x, player.y, player.size, player.size);
         }
+
+        public void Hit()
+        {
+            explosion.Play(); // play explosion sound
+            gameTimer.Enabled = false; // stop game timer
+
+            // displaying message on screen
+            messageLabel.Visible = true;
+            messageLabel.Text = "YOU'VE BEEN HIT! \n";
+
+            // making the play again and main menu buttons visible
+            playButton.Enabled = true;
+            playButton.Visible = true;
+            menuButton.Enabled = true;
+            menuButton.Visible = true;
+        }
+
+        private void playButton_Click(object sender, EventArgs e)
+        {
+            // deenable and hide buttons
+            playButton.Enabled = false;
+            playButton.Visible = false;
+            menuButton.Enabled = false;
+            menuButton.Visible = false;
+
+            // close current game screen
+            Form f = this.FindForm();
+            f.Controls.Remove(this);
+
+            // make new game screen
+            GameScreen gs = new GameScreen();
+            f.Controls.Add(gs);
+            gs.Focus();
+
+            // restart game timer
+            gameTimer.Enabled = true;
+
+            // hide cursor
+            Cursor.Hide();
+        }
+
+        private void menuButton_Click(object sender, EventArgs e)
+        {
+            // close game screen and open menu screen
+            Form f = this.FindForm();
+            f.Controls.Remove(this);
+
+            MenuScreen ms = new MenuScreen();
+            f.Controls.Add(ms);
+            ms.Focus();
+        }        
     }
 }
