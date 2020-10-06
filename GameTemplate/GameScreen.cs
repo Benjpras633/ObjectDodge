@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
+using System.Threading;
 
 namespace GameTemplate
 {
@@ -53,32 +54,12 @@ namespace GameTemplate
 
         public void MakeObjects()
         {
-            int color = randGen.Next(1, 6); // gives object its colour
-            int objectX = randGen.Next(1, 781); // gives x value for each object
+            int objectX = randGen.Next(0, 781); // gives x value for each object
+            int r = randGen.Next(0, 256);
+            int g = randGen.Next(0, 256);
+            int b = randGen.Next(0, 256);
 
-            Color c = Color.White;
-
-            // checks which colour the object will be
-            if (color == 1)
-            {
-                c = Color.Green;
-            }
-            else if (color == 2)
-            {
-                c = Color.Yellow;
-            }
-            else if (color == 3)
-            {
-                c = Color.Red;
-            }
-            else if (color == 4)
-            {
-                c = Color.Purple;
-            }
-            else if (color == 5)
-            {
-                c = Color.Orange;
-            }
+            Color c = Color.FromArgb(r, g, b);
 
             // set object start values
             Object newObject = new Object(objectX, 0, 20, c);
@@ -118,7 +99,7 @@ namespace GameTemplate
             // update location of all objects (drop down screen)
             foreach (Object b in objects)
             {
-                b.Fall(7);
+                b.Fall(8);
             }
 
             // remove object if it has gone off the screen
@@ -140,11 +121,11 @@ namespace GameTemplate
             // player controls
             if (leftArrowDown == true && player.x > 0)
             {
-                player.Move(playerSpeed, false);
+                player.Move(playerSpeed, false); // move left
             }
             if (rightArrowDown == true && player.x < this.Width - playerSize - 10)
             {
-                player.Move(playerSpeed, true);
+                player.Move(playerSpeed, true); // move right
             }
 
             // check for player collision with objects from list
@@ -193,7 +174,7 @@ namespace GameTemplate
             playButton.Enabled = true;
             playButton.Visible = true;
             menuButton.Enabled = true;
-            menuButton.Visible = true;
+            menuButton.Visible = true; 
         }
 
         private void playButton_Click(object sender, EventArgs e)
