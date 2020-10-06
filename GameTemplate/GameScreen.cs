@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Media;
-using System.Threading;
 
 namespace GameTemplate
 {
@@ -31,7 +25,7 @@ namespace GameTemplate
         // list of all objects
         List<Object> objects = new List<Object>();
 
-        // sounds
+        // sound for when player hits an object
         SoundPlayer explosion = new SoundPlayer(Properties.Resources.explosion);
 
         public GameScreen()
@@ -193,9 +187,6 @@ namespace GameTemplate
             GameScreen gs = new GameScreen();
             f.Controls.Add(gs);
             gs.Focus();
-
-            // restart game timer
-            gameTimer.Enabled = true;
 
             // hide cursor
             Cursor.Hide();
